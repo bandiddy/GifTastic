@@ -1,27 +1,168 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>GifTastic</title>
-    <link rel="stylesheet" href="assets/css/style.css">
+  <meta charset="utf-8">
+  <title>GifTastic</title>
+  <style type="text/css">
+    button,
+    div,
+    form,
+    input {
+      margin: 10px;
+    }
+  </style>
 </head>
+
 <body>
-    <div class="container">
-        <h1>Brands</h1>
-    
-         <!-- Rendered Buttons will get Dumped Here  -->
-        <div id="buttons-view"></div>
-    
-        <form id="brand-form">
-          <label for="brand-input">Add yo Brand!</label>
-          <input type="text" id="brand-input"><br>
-    
-          <!-- Button triggers new movie to be added -->
-          <input id="add-brand" type="submit" value="Add yo Brand!">
-        </form>
-<script src="assets/javascript/java.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
+  <div class="container">
+    <h1>Hype Brands</h1>
+
+    <!-- Rendered Buttons will get Dumped Here  -->
+    <div id="buttons-view"></div>
+
+    <form id="brand-form">
+      <label for="brand-input">Add a Brand, Yo!</label>
+      <input type="text" id="brand-input"><br>
+
+      <!-- Button triggers new movie to be added -->
+      <input id="add-brand" type="submit" value="Add a Brand, Yo!">
+
+      <div id="gifs"></div>
+    </form>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script type="text/javascript">
+      // Initial array of movies
+      var topics = ["Nike", "Adidas", "Gucci", "Supreme"];
+
+
+
+
+      // Generic function for capturing the movie name from the data-attribute
+      function displayGif() {
+
+        // YOUR CODE GOES HERE!!!
+        var brandName = $(this).attr('data-name');
+        brandName = brandName.trim().replace(/ /g, "+");
+
+        var APIKey = "&api_key=F5xuXdvWyA9FIs3qYyqfXZDfvjwcvfFO"
+        var queryURL = "https://api.giphy.com/v1/gifs/search?q=" + brandName + APIKey;
+
+        $.ajax({
+          url: queryURL,
+          method: "GET"
+        }).then(function (response) {
+
+          $("#gifs").empty();
+          console.log(response);
+          console.log(response.data[0].images.downsized.url);
+
+          var results = response.data
+
+          for (var i = 0; i < 10; i++) {
+            var gifDiv = $("<div>")
+
+            var rating = $("<h2 class = 'rating'>").html("Rating: " + response.data[i].rating.toUpperCase())
+
+
+            var brandImage = $("<img>")
+
+            brandImage.attr("src", results[i].images.downsized.url);
+            brandImage.attr("data-still", results[i].images.downsized_still.url);
+            brandImage.attr("data-animate", results[i].images.downsized.url);
+            brandImage.attr("data-state", "animate");
+            brandImage.addClass("pics");
+
+
+            gifDiv.append(brandImage)
+            gifDiv.append(rating)
+
+            $("#gifs").append(gifDiv)
+
+
+
+
+
+            // $("#gifs").append("<img class='img' src='" + response.data[i].images.downsized.url + "'/>");
+            // $("#gifs").append("<h4>Rating: " + response.data[i].rating.toUpperCase() + "</h4>");
+          }
+
+
+
+
+
+        });
+
+
+
+      }
+      function startStopGif() {
+        //this is getting the data state of the image. we used an onclick below
+        //this refers to id #gif
+        var state = $(this).attr("data-state");
+        //checking if state works
+        console.log(state);
+
+        if (state === "still") {
+          $(this).attr("src", $(this).attr("data-animate"));
+          $(this).attr("data-state", "animate");
+        }
+        if (state === "animate") {
+          $(this).attr("src", $(this).attr("data-still"));
+          $(this).attr("data-state", "still");
+        }
+      }
+
+
+      function renderButtons() {
+
+
+        $("#buttons-view").empty();
+
+
+        for (var i = 0; i < topics.length; i++) {
+
+
+          var a = $("<button>");
+
+          a.addClass("brand");
+
+          a.attr("data-name", topics[i]);
+
+          a.text(topics[i]);
+
+          $("#buttons-view").append(a);
+        }
+      }
+
+
+      $("#add-brand").on("click", function (event) {
+        event.preventDefault();
+
+
+        var brand = $("#brand-input").val().trim();
+
+
+        topics.push(brand);
+
+
+        renderButtons();
+      });
+
+
+      $(document).on("click", ".brand", displayGif);
+
+
+      renderButtons();
+      $(document).on("click", ".pics", startStopGif);
+
+
+
+
+    </script>
+  </div>
 </body>
+
 </html>
